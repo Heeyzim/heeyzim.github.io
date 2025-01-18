@@ -1,37 +1,44 @@
-name: Build and Deploy React Vite App
+name: Deploy static content to Pages
 
 on:
   push:
-    branches:
-      - master
+    branches: ['master']
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: true
 
 jobs:
-  build:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout do repositório
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      # Configurar Node.js
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-
-      # Instalar dependências
+          node-version: 20
+          cache: 'npm'
       - name: Install dependencies
-        run: npm install
-
-      # Build do projeto
-      - name: Build the project
+        run: npm ci
+      - name: Build
         run: npm run build
-
-      # Deploy no GitHub Pages (opcional)
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          branch: gh-pages
-          folder: dist
-          token: ${{ secrets.GH_PAT }}
+          path: './dist'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

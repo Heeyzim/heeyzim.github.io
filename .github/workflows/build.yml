@@ -1,0 +1,36 @@
+name: Build and Deploy React Vite App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout do repositório
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      # Instalar dependências
+      - name: Install dependencies
+        run: npm install
+
+      # Build do projeto
+      - name: Build the project
+        run: npm run build
+
+      # Deploy no GitHub Pages (opcional)
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: dist
